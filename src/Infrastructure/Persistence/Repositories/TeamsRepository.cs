@@ -66,9 +66,9 @@ namespace NhlStatsCrm.Infrastructure.Persistence.Repositories
 			}
 			while (response.MoreRecords);
 
-			var teamCollection = result.Select(etn =>
+			var teamCollection = result.Select(entity =>
 			{
-				var teamAttrDictionary = etn.Attributes.ToDictionary(pair => pair.Key, pair => pair.Value);
+				var teamAttrDictionary = entity.Attributes.ToDictionary(pair => pair.Key, pair => pair.Value);
 
 				return _mapper.Map<Team>(teamAttrDictionary);
 			});
@@ -78,9 +78,9 @@ namespace NhlStatsCrm.Infrastructure.Persistence.Repositories
 
 		public async Task<Team> GetByGuidAsync (Guid id)
 		{
-			var etn = await _service.RetrieveAsync(_entity, id, new ColumnSet(_columns));
+			var entity = await _service.RetrieveAsync(_entity, id, new ColumnSet(_columns));
 
-			var teamAttrDictionary = etn.Attributes.ToDictionary(pair => pair.Key, pair => pair.Value);
+			var teamAttrDictionary = entity.Attributes.ToDictionary(pair => pair.Key, pair => pair.Value);
 
 			return _mapper.Map<Team>(teamAttrDictionary);
 		}
@@ -93,12 +93,12 @@ namespace NhlStatsCrm.Infrastructure.Persistence.Repositories
 			};
 			query.Criteria.Conditions.Add(new ConditionExpression(_alternateKey, ConditionOperator.Equal, id));
 
-			var etnCollection = await _service.RetrieveMultipleAsync(query);
+			var entityCollection = await _service.RetrieveMultipleAsync(query);
 
-			if (etnCollection.Entities.Count() == 0)
+			if (entityCollection.Entities.Count() == 0)
 				return null;
 
-			var teamAttrDictionary = etnCollection.Entities.First()
+			var teamAttrDictionary = entityCollection.Entities.First()
 				.Attributes.ToDictionary(pair => pair.Key, pair => pair.Value);
 
 			return _mapper.Map<Team>(teamAttrDictionary);
