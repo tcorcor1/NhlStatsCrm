@@ -1,7 +1,9 @@
 using Microsoft.AspNetCore.Authorization;
+using NhlStatsCrm.Domain.Entities.Crm;
 using NhlStatsCrm.Application.Features.Teams.GetAllTeams;
 using NhlStatsCrm.Application.Features.Teams.GetAllTeamsByGuid;
 using NhlStatsCrm.Application.Features.Teams.GetAllTeamsByAltKey;
+using NhlStatsCrm.Application.Features.Teams.UpsertTeam;
 
 namespace WebAPI.Controllers
 {
@@ -44,6 +46,17 @@ namespace WebAPI.Controllers
 			var result = await _mediator.Send(query);
 
 			return Ok(result);
+		}
+
+		[HttpPatch("")]
+		public async Task<IActionResult> UpsertTeam ([FromBody] Team team)
+		{
+			var command = new UpsertTeamCommand(team);
+			var guid = await _mediator.Send(command);
+
+			return guid.Equals(null)
+				? NoContent()
+				: Created($"/teams/{guid}", guid);
 		}
 	}
 }
