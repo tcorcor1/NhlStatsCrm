@@ -1,4 +1,4 @@
-﻿namespace NhlStatsCrm.Domain.Entities.NHL
+﻿namespace NhlStatsCrm.Domain.Entities.Nhl
 {
 	[JsonObject("roster")]
 	public class Player

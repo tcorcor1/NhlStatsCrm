@@ -1,6 +1,6 @@
 ﻿using Newtonsoft.Json;
 
-namespace NhlStatsCrm.Domain.Entities.NHL
+namespace NhlStatsCrm.Domain.Entities.Nhl
 {
 	[JsonObject("division")]
 	public class Division
