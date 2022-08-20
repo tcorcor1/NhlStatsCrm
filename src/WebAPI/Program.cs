@@ -1,6 +1,7 @@
 using Microsoft.Identity.Web;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using NhlStatsCrm.Infrastructure;
+using NhlStatsCrm.WebAPI.Common;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -33,5 +34,7 @@ app.UseHttpsRedirection();
 app.UseAuthentication();
 app.UseAuthorization();
 app.MapControllers();
+
+app.UseExceptionHandlerMiddleware();
 
 app.Run();
