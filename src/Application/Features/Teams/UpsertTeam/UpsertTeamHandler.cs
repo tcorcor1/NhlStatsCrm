@@ -1,12 +1,13 @@
 ﻿using NhlStatsCrm.Application.Interfaces.Repositories;
+using NhlStatsCrm.Domain.Entities.Crm;
 
 namespace NhlStatsCrm.Application.Features.Teams.UpsertTeam
 {
 	public class UpsertTeamHandler : IRequestHandler<UpsertTeamCommand, Guid?>
 	{
-		private readonly ITeamsRepository _teamsRepository;
+		private readonly IDynamicsRepository<Team> _teamsRepository;
 
-		public UpsertTeamHandler (ITeamsRepository teamsRepository)
+		public UpsertTeamHandler (IDynamicsRepository<Team> teamsRepository)
 		{
 			_teamsRepository = teamsRepository;
 		}

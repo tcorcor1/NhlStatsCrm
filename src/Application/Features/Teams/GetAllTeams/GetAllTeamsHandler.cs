@@ -5,9 +5,9 @@ namespace NhlStatsCrm.Application.Features.Teams.GetAllTeams
 {
 	public class GetAllTeamsHandler : IRequestHandler<GetAllTeamsQuery, IEnumerable<Team>>
 	{
-		private readonly ITeamsRepository _teamsRepository;
+		private readonly IDynamicsRepository<Team> _teamsRepository;
 
-		public GetAllTeamsHandler (ITeamsRepository teamsRepository)
+		public GetAllTeamsHandler (IDynamicsRepository<Team> teamsRepository)
 		{
 			_teamsRepository = teamsRepository;
 		}
