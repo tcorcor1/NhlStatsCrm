@@ -1,6 +1,5 @@
-﻿using System.ServiceModel;
-using System.ComponentModel.DataAnnotations;
-using Microsoft.Xrm.Sdk;
+﻿using System.ComponentModel.DataAnnotations;
+using NhlStatsCrm.Application.Common.Exceptions;
 
 namespace NhlStatsCrm.WebAPI.Middleware
 {
@@ -19,27 +18,14 @@ namespace NhlStatsCrm.WebAPI.Middleware
 			{
 				await _next.Invoke(context);
 			}
-			catch (Exception ex)
-			{
-				await HandleExceptionMessageAsync(context, ex).ConfigureAwait(false);
-			}
-		}
-
-		private async Task HandleExceptionMessageAsync (HttpContext context, Exception exception)
-		{
-			try
-			{
-				await _next(context);
-			}
-			catch (Exception error)
+			catch (Exception exception)
 			{
 				var response = context.Response;
 				response.ContentType = "application/json";
 
-				switch (error)
+				switch (exception)
 				{
-					// TODO: need to find way to handle other dataverse fault situations
-					case FaultException<OrganizationServiceFault> ex:
+					case DynamicsNotFoundException ex:
 						response.StatusCode = (int)HttpStatusCode.NotFound;
 						break;
 
@@ -56,7 +42,7 @@ namespace NhlStatsCrm.WebAPI.Middleware
 						break;
 				}
 
-				var errorResponse = JsonConvert.SerializeObject(new { errorMessage = error.Message, errorCode = error.HResult });
+				var errorResponse = JsonConvert.SerializeObject(new { errorMessage = exception.Message });
 
 				await response.WriteAsync(errorResponse);
 			}
