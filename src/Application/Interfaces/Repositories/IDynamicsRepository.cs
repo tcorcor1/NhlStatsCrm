@@ -2,9 +2,11 @@
 {
 	public interface IDynamicsRepository<T> where T : class
 	{
-		public Task<T> GetByGuidAsync (Guid id);
+		Task<T?> GetByAltKeyAsync (string id);
 
-		public Task<IEnumerable<T>> GetAllAsync ();
+		Task<IEnumerable<T>> GetAllAsync ();
+
+		Task<Guid?> PatchAsync (T entity);
 
 		//public Task DeleteAsync (string id);
 	}
