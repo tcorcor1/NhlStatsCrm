@@ -2,6 +2,7 @@
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using NhlStatsCrm.Application.Interfaces.Repositories;
 using NhlStatsCrm.Infrastructure.Persistence.Repositories;
+using NhlStatsCrm.Domain.Entities.Crm;
 
 namespace NhlStatsCrm.Infrastructure
 {
@@ -18,7 +19,7 @@ namespace NhlStatsCrm.Infrastructure
 					 policy => policy.RequireRole("NhlStatsCrm.Contributor"));
 			});
 
-			services.AddScoped<ITeamsRepository, TeamsRepository>();
+			services.AddScoped<IDynamicsRepository<Team>, TeamsRepository>();
 			//services.AddScoped<IStatsRepository, StatsRepository>();
 			//services.AddScoped<IPlayersRepository, PlayersRepository>();
 

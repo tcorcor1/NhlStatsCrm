@@ -3,10 +3,11 @@ using Microsoft.Xrm.Sdk.Query;
 using Microsoft.Xrm.Sdk.Messages;
 using NhlStatsCrm.Domain.Entities.Crm;
 using NhlStatsCrm.Application.Interfaces.Repositories;
+using NhlStatsCrm.Application.Common.Exceptions;
 
 namespace NhlStatsCrm.Infrastructure.Persistence.Repositories
 {
-	public class TeamsRepository : ITeamsRepository
+	public class TeamsRepository : IDynamicsRepository<Team>
 	{
 		private readonly IOrganizationServiceAsync _service;
 		private readonly ILogger<TeamsRepository> _logger;
@@ -54,7 +55,13 @@ namespace NhlStatsCrm.Infrastructure.Persistence.Repositories
 					query.PageInfo.PagingCookie = pagingCookie;
 				}
 
-				response = await _service.RetrieveMultipleAsync(query);
+				var retrieveMultipleReq = new RetrieveMultipleRequest()
+				{
+					Query = query
+				};
+				var retrieveMultipleRes = (RetrieveMultipleResponse)await _service.ExecuteAsync(retrieveMultipleReq);
+
+				response = retrieveMultipleRes.EntityCollection;
 
 				if (response.MoreRecords)
 				{
@@ -66,23 +73,12 @@ namespace NhlStatsCrm.Infrastructure.Persistence.Repositories
 			}
 			while (response.MoreRecords);
 
-			var teamCollection = result.Select(entity =>
+			return result.Select(entity =>
 			{
-				var teamAttrDictionary = entity.Attributes.ToDictionary(pair => pair.Key, pair => pair.Value);
+				var entityAttrDictionary = entity.Attributes.ToDictionary(pair => pair.Key, pair => pair.Value);
 
-				return _mapper.Map<Team>(teamAttrDictionary);
+				return _mapper.Map<Team>(entityAttrDictionary);
 			});
-
-			return teamCollection;
-		}
-
-		public async Task<Team> GetByGuidAsync (Guid id)
-		{
-			var entity = await _service.RetrieveAsync(_entity, id, new ColumnSet(_columns));
-
-			var teamAttrDictionary = entity.Attributes.ToDictionary(pair => pair.Key, pair => pair.Value);
-
-			return _mapper.Map<Team>(teamAttrDictionary);
 		}
 
 		public async Task<Team?> GetByAltKeyAsync (string id)
@@ -93,12 +89,16 @@ namespace NhlStatsCrm.Infrastructure.Persistence.Repositories
 			};
 			query.Criteria.Conditions.Add(new ConditionExpression(_alternateKey, ConditionOperator.Equal, id));
 
-			var entityCollection = await _service.RetrieveMultipleAsync(query);
+			var retrieveMultipleReq = new RetrieveMultipleRequest()
+			{
+				Query = query
+			};
+			var retrieveMultipleRes = (RetrieveMultipleResponse)await _service.ExecuteAsync(retrieveMultipleReq);
 
-			if (entityCollection.Entities.Count() == 0)
-				return null;
+			if (retrieveMultipleRes.EntityCollection.Entities.Count() == 0)
+				throw new DynamicsNotFoundException($"No record found for ID: {id}");
 
-			var teamAttrDictionary = entityCollection.Entities.First()
+			var teamAttrDictionary = retrieveMultipleRes.EntityCollection.Entities.First()
 				.Attributes.ToDictionary(pair => pair.Key, pair => pair.Value);
 
 			return _mapper.Map<Team>(teamAttrDictionary);
