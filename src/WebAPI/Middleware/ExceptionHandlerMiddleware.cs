@@ -1,4 +1,6 @@
 ﻿using System.ComponentModel.DataAnnotations;
+using System.ServiceModel;
+using Microsoft.Xrm.Sdk;
 using NhlStatsCrm.Application.Common.Exceptions;
 
 namespace NhlStatsCrm.WebAPI.Middleware
@@ -33,9 +35,9 @@ namespace NhlStatsCrm.WebAPI.Middleware
 						response.StatusCode = (int)HttpStatusCode.BadRequest;
 						break;
 
-					case ValidationException ex:
-						response.StatusCode = (int)HttpStatusCode.BadRequest;
-						break;
+					//case FaultException<OrganizationServiceFault> ex:
+					//	response.StatusCode = (int)HttpStatusCode.BadRequest;
+					//	break;
 
 					default:
 						response.StatusCode = (int)HttpStatusCode.InternalServerError;

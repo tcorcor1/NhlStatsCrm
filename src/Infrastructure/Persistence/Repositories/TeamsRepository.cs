@@ -10,7 +10,6 @@ namespace NhlStatsCrm.Infrastructure.Persistence.Repositories
 	public class TeamsRepository : IDynamicsRepository<Team>
 	{
 		private readonly IOrganizationServiceAsync _service;
-		private readonly ILogger<TeamsRepository> _logger;
 		private readonly IMapper _mapper;
 		private readonly string _entity = "yyz_team";
 		private readonly string _alternateKey = "yyz_legacy_id";
@@ -27,10 +26,9 @@ namespace NhlStatsCrm.Infrastructure.Persistence.Repositories
 			"statuscode"
 		};
 
-		public TeamsRepository (ILogger<TeamsRepository> logger, IOrganizationServiceAsync service, IMapper mapper)
+		public TeamsRepository (IOrganizationServiceAsync service, IMapper mapper)
 		{
 			_service = service;
-			_logger = logger;
 			_mapper = mapper;
 		}
 
@@ -96,7 +94,7 @@ namespace NhlStatsCrm.Infrastructure.Persistence.Repositories
 			var retrieveMultipleRes = (RetrieveMultipleResponse)await _service.ExecuteAsync(retrieveMultipleReq);
 
 			if (retrieveMultipleRes.EntityCollection.Entities.Count() == 0)
-				throw new DynamicsNotFoundException($"No record found for ID: {id}");
+				throw new DynamicsNotFoundException($"No record found with ID: {id}");
 
 			var teamAttrDictionary = retrieveMultipleRes.EntityCollection.Entities.First()
 				.Attributes.ToDictionary(pair => pair.Key, pair => pair.Value);
