@@ -3,6 +3,7 @@ using Microsoft.AspNetCore.Authentication.JwtBearer;
 using NhlStatsCrm.Application.Interfaces.Repositories;
 using NhlStatsCrm.Infrastructure.Persistence.Repositories;
 using NhlStatsCrm.Domain.Entities.Crm;
+using E5NhlCrm.Infrastructure.Persistence.Repositories;
 
 namespace NhlStatsCrm.Infrastructure
 {
@@ -20,8 +21,8 @@ namespace NhlStatsCrm.Infrastructure
 			});
 
 			services.AddScoped<IDynamicsRepository<Team>, TeamsRepository>();
+			services.AddScoped<IDynamicsRepository<Player>, PlayersRepository>();
 			//services.AddScoped<IStatsRepository, StatsRepository>();
-			//services.AddScoped<IPlayersRepository, PlayersRepository>();
 
 			services.AddAutoMapper(AppDomain.CurrentDomain.GetAssemblies());
 
