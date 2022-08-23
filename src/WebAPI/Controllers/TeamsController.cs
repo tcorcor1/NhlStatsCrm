@@ -11,12 +11,10 @@ namespace WebAPI.Controllers
 	[Authorize(Policy = "RequireContributorRole")]
 	public class TeamsController : ControllerBase
 	{
-		private readonly ILogger<TeamsController> _logger;
 		private readonly IMediator _mediator;
 
-		public TeamsController (ILogger<TeamsController> logger, IMediator mediator)
+		public TeamsController (IMediator mediator)
 		{
-			_logger = logger;
 			_mediator = mediator;
 		}
 
