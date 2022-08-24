@@ -1,5 +1,7 @@
 ﻿using Microsoft.Xrm.Sdk;
 using Microsoft.Xrm.Sdk.Messages;
+using Microsoft.Xrm.Sdk.Query;
+using NhlStatsCrm.Application.Common.Exceptions;
 using NhlStatsCrm.Application.Interfaces.Repositories;
 using NhlStatsCrm.Domain.Entities.Crm;
 using NhlStatsCrm.Infrastructure.Persistence.Repositories;
@@ -17,22 +19,13 @@ namespace E5NhlCrm.Infrastructure.Persistence.Repositories
 
 		public override string[] Columns => new[] {
 			"yyz_playerid",
+			"yyz_legacy_id",
+			"yyz_team_id",
 			"yyz_full_name",
-			"yyz_birth_country",
-			"yyz_birth_date",
 			"yyz_link",
+			"yyz_jersey_number",
 			"yyz_position_name",
 			"yyz_position_type",
-			"yyz_jersey_number",
-			"yyz_team_id",
-			"yyz_weight",
-			"yyz_height",
-			"yyz_avg_goals",
-			"yyz_avg_assists",
-			"yyz_avg_points",
-			"yyz_avg_hits",
-			"yyz_avg_pim",
-			"yyz_avg_shots"
 		};
 
 		public PlayersRepository (ILogger<PlayersRepository> logger, IOrganizationServiceAsync service, IMapper mapper) : base(logger, service, mapper)
@@ -40,6 +33,33 @@ namespace E5NhlCrm.Infrastructure.Persistence.Repositories
 			_service = service;
 			_logger = logger;
 			_mapper = mapper;
+		}
+
+		public override async Task<Player?> GetByAltKeyAsync (string id)
+		{
+			var query = new QueryExpression(Entity)
+			{
+				ColumnSet = new ColumnSet(Columns)
+			};
+			query.Criteria.Conditions.Add(new ConditionExpression(AlternateKey, ConditionOperator.Equal, id));
+
+			var link = query.AddLink("yyz_team", "yyz_team_id", "yyz_teamid", JoinOperator.Inner);
+			link.Columns.AddColumn("yyz_legacy_id");
+			link.EntityAlias = "team";
+
+			var retrieveMultipleReq = new RetrieveMultipleRequest()
+			{
+				Query = query
+			};
+			var retrieveMultipleRes = (RetrieveMultipleResponse)await _service.ExecuteAsync(retrieveMultipleReq);
+
+			if (retrieveMultipleRes.EntityCollection.Entities.Count() == 0)
+				throw new DynamicsNotFoundException($"No record found with ID: {id}");
+
+			var entityAttrDictionary = retrieveMultipleRes.EntityCollection.Entities.First()
+				.Attributes.ToDictionary(pair => pair.Key, pair => pair.Value);
+
+			return _mapper.Map<Player>(entityAttrDictionary);
 		}
 
 		public async Task<Guid?> PatchAsync (Player player)
