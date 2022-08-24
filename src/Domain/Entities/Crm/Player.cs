@@ -13,6 +13,8 @@ namespace NhlStatsCrm.Domain.Entities.Crm
 		[Required]
 		public string? TeamId { get; set; }
 
+		public string? TeamName { get; set; }
+
 		[Required]
 		public string? Link { get; set; }
 
