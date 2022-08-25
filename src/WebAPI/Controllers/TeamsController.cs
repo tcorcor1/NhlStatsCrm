@@ -1,5 +1,5 @@
 using Microsoft.AspNetCore.Authorization;
-using NhlStatsCrm.Domain.Entities.Crm;
+using NhlStatsCrm.Domain.Entities.Nhl;
 using NhlStatsCrm.Application.Features.Teams.GetAllTeams;
 using NhlStatsCrm.Application.Features.Teams.GetAllTeamsByAltKey;
 using NhlStatsCrm.Application.Features.Teams.UpsertTeam;

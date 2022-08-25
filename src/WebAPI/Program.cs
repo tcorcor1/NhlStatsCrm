@@ -1,7 +1,6 @@
-using Microsoft.Identity.Web;
-using Microsoft.AspNetCore.Authentication.JwtBearer;
 using NhlStatsCrm.Infrastructure;
 using NhlStatsCrm.WebAPI.Common;
+using NhlStatsCrm.Application;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -17,6 +16,7 @@ builder.Services.AddMediatR(AppDomain.CurrentDomain.Load("NhlStatsCrm.Applicatio
 builder.Services.AddSwaggerGen();
 
 builder.Services.AddInfrastructureServices(builder.Configuration);
+builder.Services.AddApplicationServices();
 
 var app = builder.Build();
 

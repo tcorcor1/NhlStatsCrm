@@ -36,7 +36,7 @@
 		public Franchise Franchise { get; set; }
 
 		[JsonProperty("roster")]
-		public RosterInfo RosterInfo { get; set; }
+		public RosterInfo? RosterInfo { get; set; }
 
 		[JsonProperty("shortName")]
 		public string ShortName { get; set; }

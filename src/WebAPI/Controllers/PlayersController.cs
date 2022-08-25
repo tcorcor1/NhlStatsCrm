@@ -2,7 +2,7 @@ using Microsoft.AspNetCore.Authorization;
 using NhlStatsCrm.Application.Features.Players.GetAllPlayers;
 using NhlStatsCrm.Application.Features.Players.GetAllPlayersByAltKey;
 using NhlStatsCrm.Application.Features.Players.UpsertPlayer;
-using NhlStatsCrm.Domain.Entities.Crm;
+using NhlStatsCrm.Domain.Entities.Nhl;
 
 namespace WebAPI.Controllers
 {
@@ -27,7 +27,7 @@ namespace WebAPI.Controllers
 			return Ok(result);
 		}
 
-		[HttpGet("{PlayerId}")]
+		[HttpGet("{playerId}")]
 		public async Task<IActionResult> GetPlayerById (string playerId)
 		{
 			var query = new GetAllPlayersByPlayerAltKeyQuery(playerId);
