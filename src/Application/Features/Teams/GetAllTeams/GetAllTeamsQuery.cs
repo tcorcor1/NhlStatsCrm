@@ -1,8 +1,8 @@
-﻿using NhlStatsCrm.Domain.Entities.Crm;
+﻿using NhlStatsCrm.Application.Dto;
 
 namespace NhlStatsCrm.Application.Features.Teams.GetAllTeams
 {
-	public class GetAllTeamsQuery : IRequest<IEnumerable<Team>>
+	public class GetAllTeamsQuery : IRequest<IEnumerable<TeamDto>>
 	{
 	}
 }

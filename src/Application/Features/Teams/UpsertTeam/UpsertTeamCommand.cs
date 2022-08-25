@@ -1,4 +1,4 @@
-﻿using NhlStatsCrm.Domain.Entities.Crm;
+﻿using NhlStatsCrm.Domain.Entities.Nhl;
 
 namespace NhlStatsCrm.Application.Features.Teams.UpsertTeam
 {

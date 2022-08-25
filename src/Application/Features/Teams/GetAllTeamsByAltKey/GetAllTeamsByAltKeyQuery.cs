@@ -1,8 +1,8 @@
-﻿using NhlStatsCrm.Domain.Entities.Crm;
+﻿using NhlStatsCrm.Application.Dto;
 
 namespace NhlStatsCrm.Application.Features.Teams.GetAllTeamsByAltKey
 {
-	public class GetAllTeamsByAltKeyQuery : IRequest<Team?>
+	public class GetAllTeamsByAltKeyQuery : IRequest<TeamDto>
 	{
 		public string TeamId;
 

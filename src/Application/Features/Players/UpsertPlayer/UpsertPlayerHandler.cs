@@ -1,5 +1,5 @@
 ﻿using NhlStatsCrm.Application.Interfaces.Repositories;
-using NhlStatsCrm.Domain.Entities.Crm;
+using NhlStatsCrm.Domain.Entities.Nhl;
 
 namespace NhlStatsCrm.Application.Features.Players.UpsertPlayer
 {

@@ -1,8 +1,8 @@
-﻿using NhlStatsCrm.Domain.Entities.Crm;
+﻿using NhlStatsCrm.Application.Dto;
 
 namespace NhlStatsCrm.Application.Features.Players.GetAllPlayersByAltKey
 {
-	public class GetAllPlayersByPlayerAltKeyQuery : IRequest<Player>
+	public class GetAllPlayersByPlayerAltKeyQuery : IRequest<PlayerDto>
 	{
 		public string PlayerId { get; }
 
