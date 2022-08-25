@@ -28,7 +28,7 @@ namespace WebAPI.Controllers
 		}
 
 		[HttpGet("{playerId}")]
-		public async Task<IActionResult> GetPlayerById (string playerId)
+		public async Task<IActionResult> GetPlayerByAltKey (string playerId)
 		{
 			var query = new GetAllPlayersByPlayerAltKeyQuery(playerId);
 			var result = await _mediator.Send(query);

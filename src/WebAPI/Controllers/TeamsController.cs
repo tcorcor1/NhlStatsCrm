@@ -28,7 +28,7 @@ namespace WebAPI.Controllers
 		}
 
 		[HttpGet("{teamId}")]
-		public async Task<IActionResult> GetTeamById (string teamId)
+		public async Task<IActionResult> GetTeamByAltKey (string teamId)
 		{
 			var query = new GetAllTeamsByAltKeyQuery(teamId);
 			var result = await _mediator.Send(query);
