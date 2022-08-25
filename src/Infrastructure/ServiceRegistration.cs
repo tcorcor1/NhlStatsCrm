@@ -21,7 +21,7 @@ namespace NhlStatsCrm.Infrastructure
 
 			services.AddScoped<IDynamicsRepository<Team>, TeamsRepository>();
 			services.AddScoped<IDynamicsRepository<Player>, PlayersRepository>();
-			//services.AddScoped<IStatsRepository, StatsRepository>();
+			services.AddScoped<IDynamicsRepository<Stat>, StatsRepository>();
 
 			services.AddSingleton<IOrganizationServiceAsync>(srv => new ServiceClient(configuration.GetConnectionString("DATAVERSE")));
 		}

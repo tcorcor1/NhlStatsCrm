@@ -40,7 +40,7 @@ namespace NhlStatsCrm.WebAPI.Middleware
 
 					case FaultException<OrganizationServiceFault> ex:
 						response.StatusCode = (int)HttpStatusCode.BadRequest;
-						errorMessage = ((FaultException<OrganizationServiceFault>)exception).Detail.InnerFault.InnerFault.Message;
+						errorMessage = ((FaultException<OrganizationServiceFault>)exception).Detail.Message;
 						break;
 
 					default:

@@ -1,11 +1,7 @@
-﻿namespace NhlStatsCrm.Domain.Entities.Crm
+﻿namespace NhlStatsCrm.Application.Dto
 {
-	public class Stat
+	public class StatDto
 	{
-		public string LegacyId { get; set; }
-
-		public Guid StatId { get; set; }
-
 		public string? PlayerName { get; set; }
 
 		public string? SeasonName { get; set; }
