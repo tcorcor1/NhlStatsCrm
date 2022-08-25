@@ -3,16 +3,14 @@ using Microsoft.Xrm.Sdk.Messages;
 using Microsoft.Xrm.Sdk.Query;
 using NhlStatsCrm.Application.Common.Exceptions;
 using NhlStatsCrm.Application.Interfaces.Repositories;
-using NhlStatsCrm.Domain.Entities.Crm;
-using NhlStatsCrm.Infrastructure.Persistence.Repositories;
+using NhlStatsCrm.Domain.Entities.Nhl;
 
-namespace E5NhlCrm.Infrastructure.Persistence.Repositories
+namespace NhlStatsCrm.Infrastructure.Persistence.Repositories
 {
 	public class PlayersRepository : RepositoryBase<Player>, IDynamicsRepository<Player>
 	{
 		private readonly IOrganizationServiceAsync _service;
 		private readonly ILogger<PlayersRepository> _logger;
-		private readonly IMapper _mapper;
 
 		public override string Entity => "yyz_player";
 		public override string AlternateKey => "yyz_legacy_id";
@@ -28,14 +26,13 @@ namespace E5NhlCrm.Infrastructure.Persistence.Repositories
 			"yyz_position_type",
 		};
 
-		public PlayersRepository (ILogger<PlayersRepository> logger, IOrganizationServiceAsync service, IMapper mapper) : base(logger, service, mapper)
+		public PlayersRepository (ILogger<PlayersRepository> logger, IOrganizationServiceAsync service) : base(logger, service)
 		{
 			_service = service;
 			_logger = logger;
-			_mapper = mapper;
 		}
 
-		public override async Task<Player?> GetByAltKeyAsync (string id)
+		public override async Task<EntityCollection> GetByAltKeyAsync (string id)
 		{
 			var query = new QueryExpression(Entity)
 			{
@@ -56,30 +53,73 @@ namespace E5NhlCrm.Infrastructure.Persistence.Repositories
 			if (retrieveMultipleRes.EntityCollection.Entities.Count() == 0)
 				throw new DynamicsNotFoundException($"No record found with ID: {id}");
 
-			var entityAttrDictionary = retrieveMultipleRes.EntityCollection.Entities.First()
-				.Attributes.ToDictionary(pair => pair.Key, pair => pair.Value);
+			return retrieveMultipleRes.EntityCollection;
+		}
 
-			return _mapper.Map<Player>(entityAttrDictionary);
+		public override async Task<EntityCollection> GetAllAsync ()
+		{
+			var pageNumber = 1;
+			var pagingCookie = string.Empty;
+			var result = new EntityCollection();
+			var response = new EntityCollection();
+
+			var query = new QueryExpression(Entity)
+			{
+				EntityName = Entity,
+				ColumnSet = new ColumnSet(Columns)
+			};
+
+			var link = query.AddLink("yyz_team", "yyz_team_id", "yyz_teamid", JoinOperator.Inner);
+			link.Columns.AddColumn("yyz_legacy_id");
+			link.EntityAlias = "team";
+
+			do
+			{
+				if (pageNumber != 1)
+				{
+					query.PageInfo.PageNumber = pageNumber;
+					query.PageInfo.PagingCookie = pagingCookie;
+				}
+
+				var retrieveMultipleReq = new RetrieveMultipleRequest()
+				{
+					Query = query
+				};
+				var retrieveMultipleRes = (RetrieveMultipleResponse)await _service.ExecuteAsync(retrieveMultipleReq);
+
+				response = retrieveMultipleRes.EntityCollection;
+
+				if (response.MoreRecords)
+				{
+					pageNumber++;
+					pagingCookie = response.PagingCookie;
+				}
+
+				result.Entities.AddRange(response.Entities);
+			}
+			while (response.MoreRecords);
+
+			return result;
 		}
 
 		public async Task<Guid?> PatchAsync (Player player)
 		{
 			var upsertPlayer = new UpsertRequest()
 			{
-				Target = new Entity(Entity, AlternateKey, player.LegacyId)
+				Target = new Entity(Entity, AlternateKey, player.Person.Id.ToString())
 				{
-					["yyz_full_name"] = player.FullName,
+					["yyz_full_name"] = player.Person.FullName,
 					["yyz_team_id"] = new EntityReference("yyz_team", "yyz_legacy_id", player.TeamId),
-					["yyz_link"] = player.Link,
-					["yyz_position_name"] = player.PositionName,
-					["yyz_position_type"] = player.PositionType,
-					["yyz_jersey_number"] = player.JerseyNumber,
+					["yyz_link"] = player.Person.Link,
+					["yyz_position_name"] = player.Position.Name,
+					["yyz_position_type"] = player.Position.Type,
+					["yyz_jersey_number"] = Convert.ToInt32(player.JerseyNumber),
 				}
 			};
 
 			var upsertRes = (UpsertResponse)await _service.ExecuteAsync(upsertPlayer);
 
-			_logger.LogInformation($"Patching: {player.FullName}");
+			_logger.LogInformation($"Patching: {player.Person.FullName}");
 
 			return upsertRes.RecordCreated
 				? upsertRes.Target.Id

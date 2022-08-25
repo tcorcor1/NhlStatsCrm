@@ -1,4 +1,4 @@
-﻿using NhlStatsCrm.Domain.Entities.Crm;
+﻿using NhlStatsCrm.Application.Dto;
 
 namespace NhlStatsCrm.Infrastructure.Mapping
 {
@@ -6,7 +6,7 @@ namespace NhlStatsCrm.Infrastructure.Mapping
 	{
 		public TeamCrmProfile ()
 		{
-			CreateMap<IDictionary<string, object>, Team>()
+			CreateMap<IDictionary<string, object>, TeamDto>()
 				.ForMember(dest => dest.TeamName, src => src.MapFrom(x => x["yyz_team_name"]))
 				.ForMember(dest => dest.ShortName, src => src.MapFrom(x => x["yyz_short_name"]))
 				.ForMember(dest => dest.FranchiseId, src => src.MapFrom(x => x["yyz_franchise_id"]))

@@ -9,19 +9,17 @@ namespace NhlStatsCrm.Infrastructure.Persistence.Repositories
 	{
 		private ILogger<RepositoryBase<T>> _logger;
 		private IOrganizationServiceAsync _service;
-		private IMapper _mapper;
 		public abstract string Entity { get; }
 		public abstract string AlternateKey { get; }
 		public abstract string[] Columns { get; }
 
-		public RepositoryBase (ILogger<RepositoryBase<T>> logger, IOrganizationServiceAsync service, IMapper mapper)
+		public RepositoryBase (ILogger<RepositoryBase<T>> logger, IOrganizationServiceAsync service)
 		{
 			_logger = logger;
 			_service = service;
-			_mapper = mapper;
 		}
 
-		public virtual async Task<T?> GetByAltKeyAsync (string id)
+		public virtual async Task<EntityCollection> GetByAltKeyAsync (string id)
 		{
 			var query = new QueryExpression(Entity)
 			{
@@ -38,17 +36,14 @@ namespace NhlStatsCrm.Infrastructure.Persistence.Repositories
 			if (retrieveMultipleRes.EntityCollection.Entities.Count() == 0)
 				throw new DynamicsNotFoundException($"No record found with ID: {id}");
 
-			var entityAttrDictionary = retrieveMultipleRes.EntityCollection.Entities.First()
-				.Attributes.ToDictionary(pair => pair.Key, pair => pair.Value);
-
-			return _mapper.Map<T>(entityAttrDictionary);
+			return retrieveMultipleRes.EntityCollection;
 		}
 
-		public virtual async Task<IEnumerable<T>> GetAllAsync ()
+		public virtual async Task<EntityCollection> GetAllAsync ()
 		{
 			var pageNumber = 1;
 			var pagingCookie = string.Empty;
-			var result = new List<Entity>();
+			var result = new EntityCollection();
 			var response = new EntityCollection();
 
 			var query = new QueryExpression(Entity)
@@ -79,16 +74,11 @@ namespace NhlStatsCrm.Infrastructure.Persistence.Repositories
 					pagingCookie = response.PagingCookie;
 				}
 
-				result.AddRange(response.Entities);
+				result.Entities.AddRange(response.Entities);
 			}
 			while (response.MoreRecords);
 
-			return result.Select(entity =>
-			{
-				var entityAttrDictionary = entity.Attributes.ToDictionary(pair => pair.Key, pair => pair.Value);
-
-				return _mapper.Map<T>(entityAttrDictionary);
-			});
+			return result;
 		}
 	}
 }

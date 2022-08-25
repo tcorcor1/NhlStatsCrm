@@ -1,6 +1,6 @@
 ﻿using Microsoft.Xrm.Sdk;
 using Microsoft.Xrm.Sdk.Messages;
-using NhlStatsCrm.Domain.Entities.Crm;
+using NhlStatsCrm.Domain.Entities.Nhl;
 using NhlStatsCrm.Application.Interfaces.Repositories;
 
 namespace NhlStatsCrm.Infrastructure.Persistence.Repositories
@@ -9,7 +9,6 @@ namespace NhlStatsCrm.Infrastructure.Persistence.Repositories
 	{
 		private readonly IOrganizationServiceAsync _service;
 		private readonly ILogger<TeamsRepository> _logger;
-		private readonly IMapper _mapper;
 
 		public override string Entity => "yyz_team";
 		public override string AlternateKey => "yyz_legacy_id";
@@ -26,18 +25,17 @@ namespace NhlStatsCrm.Infrastructure.Persistence.Repositories
 			"statuscode"
 		};
 
-		public TeamsRepository (ILogger<TeamsRepository> logger, IOrganizationServiceAsync service, IMapper mapper) : base(logger, service, mapper)
+		public TeamsRepository (ILogger<TeamsRepository> logger, IOrganizationServiceAsync service) : base(logger, service)
 		{
 			_logger = logger;
 			_service = service;
-			_mapper = mapper;
 		}
 
 		public async Task<Guid?> PatchAsync (Team team)
 		{
 			var upsertTeam = new UpsertRequest()
 			{
-				Target = new Entity(Entity, AlternateKey, team.LegacyId)
+				Target = new Entity(Entity, AlternateKey, team.Id)
 				{
 					["yyz_team_name"] = team.TeamName,
 					["yyz_short_name"] = team.ShortName,

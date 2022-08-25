@@ -1,5 +1,5 @@
 ﻿using Microsoft.Xrm.Sdk;
-using NhlStatsCrm.Domain.Entities.Crm;
+using NhlStatsCrm.Application.Dto;
 
 namespace NhlStatsCrm.Infrastructure.Mapping
 {
@@ -7,7 +7,7 @@ namespace NhlStatsCrm.Infrastructure.Mapping
 	{
 		public PlayerCrmProfile ()
 		{
-			CreateMap<IDictionary<string, object>, Player>()
+			CreateMap<IDictionary<string, object>, PlayerDto>()
 				.ForMember(dest => dest.LegacyId, src => src.MapFrom(x => x.ContainsKey("yyz_legacy_id") ? x["yyz_legacy_id"] : null))
 				.ForMember(dest => dest.FullName, src => src.MapFrom(x => x.ContainsKey("yyz_full_name") ? x["yyz_full_name"] : null))
 				.ForMember(dest => dest.TeamId, src => src.MapFrom(x => x.ContainsKey("team.yyz_legacy_id") ? ((AliasedValue)x["team.yyz_legacy_id"]).Value : null))
