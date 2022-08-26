@@ -1,7 +1,6 @@
-﻿using Microsoft.Xrm.Sdk;
-using NhlStatsCrm.Application.Dto;
+﻿using NhlStatsCrm.Application.Dto;
 
-namespace NhlStatsCrm.Infrastructure.Mapping
+namespace NhlStatsCrm.Application.Mapping
 {
 	public class PlayerCrmProfile : Profile
 	{
