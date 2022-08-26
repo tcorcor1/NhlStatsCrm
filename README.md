@@ -37,6 +37,8 @@ The API supports some GET requests although this API isn't intended for use by e
 
 If you haven't already, I highly recommend joining the Microsoft Developer Program. You will receive your own Microsoft 365 tenant which will include a Dynamics instance among many other things. So long as you continue to use this environment for development, your license will be renewed each 90 days. Check out sign-up info [HERE](https://developer.microsoft.com/en-us/microsoft-365/dev-program).
 
+Initial project setup
+
 - Create your appsettings.Production.json and appsettings.Development.json files. There is an example appsettings.json in the project
 - Set up Azure app registration
 - Create app role NhlStatsCrm.Contributor and assign to app user
