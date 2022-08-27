@@ -23,7 +23,7 @@ namespace NhlStatsCrm.Infrastructure
 			services.AddScoped<IDynamicsRepository<Player>, PlayersRepository>();
 			services.AddScoped<IDynamicsRepository<Stat>, StatsRepository>();
 
-			services.AddSingleton<IOrganizationServiceAsync>(srv => new ServiceClient(configuration.GetConnectionString("DATAVERSE")));
+			services.AddScoped<IOrganizationServiceAsync>(srv => new ServiceClient(configuration.GetConnectionString("DATAVERSE")));
 		}
 	}
 }
