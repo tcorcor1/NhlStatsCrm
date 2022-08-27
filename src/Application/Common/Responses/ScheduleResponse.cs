@@ -1,4 +1,6 @@
-﻿namespace NhlStatsCrm.Domain.Entities.Nhl
+﻿using NhlStatsCrm.Domain.Entities.Nhl;
+
+namespace NhlStatsCrm.Application.Common.Responses
 {
 	[JsonObject("Rootobject")]
 	public class ScheduleResponse

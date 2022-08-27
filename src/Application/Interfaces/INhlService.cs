@@ -1,14 +1,14 @@
-﻿//using Application.Services;
-//using Domain.Entities.NHL;
+﻿using NhlStatsCrm.Domain.Entities.Nhl;
+using NhlStatsCrm.Application.Common.Responses;
 
-//namespace NhlStatsCrm.Application.Interfaces
-//{
-//	public interface INhlService
-//	{
-//		Task<NhlServiceResponse<LiveTeamsResponse>> GetLiveTeams (string? date = null);
+namespace NhlStatsCrm.Application.Interfaces
+{
+	public interface INhlService
+	{
+		Task<NhlServiceResponse<LiveTeamsResponse>> GetLiveTeams (string? date = null);
 
-//		Task<NhlServiceResponse<RostersResponse>> GetRoster (TeamInfo teaminfo);
+		Task<NhlServiceResponse<RostersResponse>> GetRoster (TeamInfo teaminfo);
 
-//		Task<NhlServiceResponse<PlayerStat>> GetPlayerStat (Player player);
-//	}
-//}
+		Task<NhlServiceResponse<PlayerStat>> GetPlayerStat (Player player);
+	}
+}

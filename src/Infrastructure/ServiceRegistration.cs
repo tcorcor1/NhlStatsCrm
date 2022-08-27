@@ -3,6 +3,8 @@ using Microsoft.AspNetCore.Authentication.JwtBearer;
 using NhlStatsCrm.Application.Interfaces.Repositories;
 using NhlStatsCrm.Infrastructure.Persistence.Repositories;
 using NhlStatsCrm.Domain.Entities.Nhl;
+using NhlStatsCrm.Application.Interfaces;
+using NhlStatsCrm.Infrastructure.Services.NhlService;
 
 namespace NhlStatsCrm.Infrastructure
 {
