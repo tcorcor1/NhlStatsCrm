@@ -3,6 +3,7 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Azure.Functions.Extensions.DependencyInjection;
 using NhlStatsCrm.Infrastructure.Services.NhlService;
 using NhlStatsCrm.Application.Interfaces;
+using NhlStatsCrm.Functions.Services.AuthService;
 
 [assembly: FunctionsStartup(typeof(Functions.Startup))]
 
@@ -27,6 +28,7 @@ namespace Functions
 			});
 
 			builder.Services.AddScoped<INhlService, NhlService>();
+			builder.Services.AddScoped<IAuthService, AuthService>();
 
 			//builder.Services.AddAutoMapper(AppDomain.CurrentDomain.GetAssemblies());
 			//builder.Services.AddSingleton<IOrganizationServiceAsync>(srv => new ServiceClient(Environment.GetEnvironmentVariable("DATAVERSE")));
