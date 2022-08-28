@@ -29,9 +29,6 @@ namespace Functions
 
 			builder.Services.AddScoped<INhlService, NhlService>();
 			builder.Services.AddScoped<IAuthService, AuthService>();
-
-			//builder.Services.AddAutoMapper(AppDomain.CurrentDomain.GetAssemblies());
-			//builder.Services.AddSingleton<IOrganizationServiceAsync>(srv => new ServiceClient(Environment.GetEnvironmentVariable("DATAVERSE")));
 		}
 	}
 }
