@@ -8,13 +8,11 @@ namespace NhlStatsCrm.Infrastructure.Services.NhlService
 	{
 		private IHttpClientFactory _httpClientFactory;
 		private ILogger _logger;
-		private IMapper _mapper;
 
-		public NhlService (IHttpClientFactory httpClientFactory, ILogger<NhlService> logger, IMapper mapper)
+		public NhlService (IHttpClientFactory httpClientFactory, ILogger<NhlService> logger)
 		{
 			_httpClientFactory = httpClientFactory;
 			_logger = logger;
-			_mapper = mapper;
 		}
 
 		public async Task<NhlServiceResponse<LiveTeamsResponse>> GetLiveTeams (string? date = null)
@@ -27,7 +25,7 @@ namespace NhlStatsCrm.Infrastructure.Services.NhlService
 			var response = await httpClient.GetAsync(url);
 
 			if (!response.IsSuccessStatusCode)
-				throw new HttpRequestException(response.ReasonPhrase);
+				return new NhlServiceResponse<LiveTeamsResponse>(response.IsSuccessStatusCode, response.StatusCode, response.ReasonPhrase);
 
 			var json = await response.Content.ReadAsStringAsync();
 			var scheduleResponse = JsonConvert.DeserializeObject<ScheduleResponse>(json);
@@ -62,14 +60,12 @@ namespace NhlStatsCrm.Infrastructure.Services.NhlService
 
 		public async Task<NhlServiceResponse<RosterResponse>> GetRoster (TeamInfo teamInfo)
 		{
-			ArgumentNullException.ThrowIfNull(teamInfo);
-
 			var httpClient = _httpClientFactory.CreateClient("NHL-API");
 
 			var response = await httpClient.GetAsync($"/api/v1/teams?teamId={teamInfo.Id}&expand=team.roster");
 
 			if (!response.IsSuccessStatusCode)
-				throw new HttpRequestException(response.ReasonPhrase);
+				return new NhlServiceResponse<RosterResponse>(response.IsSuccessStatusCode, response.StatusCode, response.ReasonPhrase);
 
 			var json = await response.Content.ReadAsStringAsync();
 
@@ -81,61 +77,35 @@ namespace NhlStatsCrm.Infrastructure.Services.NhlService
 			return new NhlServiceResponse<RosterResponse>(response.IsSuccessStatusCode, response.StatusCode, "Success", rosterResponse);
 		}
 
-		public async Task<NhlServiceResponse<PlayerStat>> GetPlayerStat (Player player)
+		public async Task<NhlServiceResponse<Stat>> GetPlayerStat (Player player)
 		{
-			throw new NotImplementedException();
+			var httpClientNhl = _httpClientFactory.CreateClient("NHL-API");
 
-			//var httpClientNhl = _httpClientFactory.CreateClient("NHL-API");
+			var res = await httpClientNhl.GetAsync($"/api/v1/people/{player.Person.Id}/stats?stats=statsSingleSeason");
 
-			//var res = await httpClientNhl.GetAsync($"/api/v1/people/{player.Person.Id}/stats?stats=statsSingleSeason");
+			if (!res.IsSuccessStatusCode)
+			{
+				_logger.LogError($"Could not get player stat - {player.Person.Id}. Reason: {res.ReasonPhrase}");
 
-			//if (!res.IsSuccessStatusCode)
-			//{
-			//	_logger.LogError($"##GG## -- Could not get player stat - {player.Person.Id}");
+				new NhlServiceResponse<Stat>(false, res.StatusCode, $"Could not retrieve player stat {player.Person.Id}", new Stat());
+			}
 
-			//	return new NhlServiceResponse<PlayerStat>()
-			//	{
-			//		StatusCode = res.StatusCode,
-			//		IsSuccess = res.IsSuccessStatusCode,
-			//		Message = res.ReasonPhrase,
-			//		Body = null
-			//	};
-			//}
+			var json = await res.Content.ReadAsStringAsync();
 
-			//var json = await res.Content.ReadAsStringAsync();
+			var playerStatsResponse = JsonConvert.DeserializeObject<StatsResponse>(json);
 
-			//var playerStatsResponse = JsonConvert.DeserializeObject<StatsResponse>(json);
+			if (playerStatsResponse.StatDetailCollection[0].Splits.Length == 0)
+			{
+				_logger.LogError($"No seasons available - {player.Person.Id}");
 
-			//if (playerStatsResponse.StatDetailCollection[0].Splits.Length == 0)
-			//{
-			//	_logger.LogError($"##GG## -- No seasons available - {player.Person.Id}");
+				return new NhlServiceResponse<Stat>(false, res.StatusCode, $"No seasons available - {player.Person.Id}", new Stat());
+			};
 
-			//	return new NhlServiceResponse<PlayerStat>()
-			//	{
-			//		StatusCode = HttpStatusCode.NoContent,
-			//		IsSuccess = false,
-			//		Message = res.ReasonPhrase,
-			//		Body = null
-			//	};
-			//};
+			var stat = playerStatsResponse.StatDetailCollection[0].Splits[0].Stat;
+			stat.PlayerId = player.Person.Id;
+			stat.SeasonName = playerStatsResponse.StatDetailCollection[0].Splits[0].Season;
 
-			//var stat = playerStatsResponse.StatDetailCollection[0].Splits[0].Stat;
-
-			//var playerStat = _mapper.Map<PlayerStat>(
-			//	stat, opt =>
-			//	{
-			//		opt.Items["PlayerId"] = player.Person.Id;
-			//		opt.Items["SeasonName"] = playerStatsResponse.StatDetailCollection[0].Splits[0].Season;
-			//	}
-			//);
-
-			//return new NhlServiceResponse<PlayerStat>()
-			//{
-			//	StatusCode = res.StatusCode,
-			//	IsSuccess = true,
-			//	Message = res.ReasonPhrase,
-			//	Body = playerStat
-			//};
+			return new NhlServiceResponse<Stat>(res.IsSuccessStatusCode, res.StatusCode, "Success", stat);
 		}
 	}
 }
