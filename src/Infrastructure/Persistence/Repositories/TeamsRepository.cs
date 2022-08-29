@@ -33,9 +33,11 @@ namespace NhlStatsCrm.Infrastructure.Persistence.Repositories
 
 		public async Task<Guid?> PatchAsync (Team team)
 		{
+			var teamId = team.Id;
+
 			var upsertTeam = new UpsertRequest()
 			{
-				Target = new Entity(Entity, AlternateKey, team.Id)
+				Target = new Entity(Entity, AlternateKey, teamId)
 				{
 					["yyz_team_name"] = team.TeamName,
 					["yyz_short_name"] = team.ShortName,
@@ -44,6 +46,8 @@ namespace NhlStatsCrm.Infrastructure.Persistence.Repositories
 					["yyz_abbreviation"] = team.Abbreviation
 				}
 			};
+
+			_logger.LogInformation("Patching Team: {TeamId}", teamId);
 
 			var upsertRes = (UpsertResponse)await _service.ExecuteAsync(upsertTeam);
 

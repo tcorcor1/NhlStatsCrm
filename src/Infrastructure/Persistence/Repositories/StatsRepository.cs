@@ -79,6 +79,8 @@ namespace NhlStatsCrm.Infrastructure.Persistence.Repositories
 
 		public async Task<Guid?> PatchAsync (Stat playerStat)
 		{
+			var playerId = playerStat.PlayerId;
+
 			var upsertPlayer = new UpsertRequest()
 			{
 				Target = new Entity(Entity, AlternateKey, $"{playerStat.SeasonName}{playerStat.PlayerId}")
@@ -120,6 +122,8 @@ namespace NhlStatsCrm.Infrastructure.Persistence.Repositories
 					["yyz_short_handed_save_percentage"] = playerStat.ShortHandedSavePercentage,
 				}
 			};
+
+			_logger.LogInformation("Patching stat for Player: {PlayerId}", playerId);
 
 			var upsertRes = (UpsertResponse)await _service.ExecuteAsync(upsertPlayer);
 
