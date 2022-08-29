@@ -36,6 +36,9 @@ namespace Functions
 		{
 			var liveTeamsRes = await _nhlService.GetLiveTeams(date); //2021-11-19
 
+			if (!liveTeamsRes.IsSuccess)
+				return StatusCode((int)liveTeamsRes.StatusCode);
+
 			if (liveTeamsRes.Body.GameCollection.Count() == 0)
 				return Ok(liveTeamsRes);
 
@@ -44,6 +47,12 @@ namespace Functions
 			foreach (var team in liveTeamsRes.Body.TeamInfoCollection)
 			{
 				var rosterRes = await _nhlService.GetRoster(team);
+
+				if (!rosterRes.IsSuccess)
+				{
+					log.LogError($"Could not retrieve roster for team: {team.Name}/{team.Id}. Error: {rosterRes.Message}");
+					continue;
+				}
 
 				var updateRosterTeamId = rosterRes.Body.Teams[0].RosterInfo.PlayerCollection
 					.Select(player =>
@@ -56,9 +65,9 @@ namespace Functions
 				playersCollection.AddRange(updateRosterTeamId);
 			}
 
-			var accessToken = await _authService.GetAccessTokenAsync();
-
 			var httpClient = _httpClientFactory.CreateClient("NhlStatsCrm");
+
+			var accessToken = await _authService.GetAccessTokenAsync();
 			httpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", accessToken);
 
 			foreach (var p in playersCollection)
@@ -82,54 +91,67 @@ namespace Functions
 		public async Task<IActionResult> RunPatchStats (
 			[HttpTrigger(AuthorizationLevel.Function, "get", Route = "stats/player/{date?}")] HttpRequest req, ILogger log, string date = null)
 		{
-			throw new NotImplementedException();
+			var liveTeamsRes = await _nhlService.GetLiveTeams(date);
 
-			//var liveTeamsRes = await _nhlService.GetLiveTeams(date); //2021-11-19
+			if (!liveTeamsRes.IsSuccess)
+				return StatusCode((int)liveTeamsRes.StatusCode);
 
-			//var playersCollection = new List<Player>();
+			if (liveTeamsRes.Body.GameCollection.Count() == 0)
+				return Ok(liveTeamsRes);
 
-			//foreach (var team in liveTeamsRes.Body.TeamInfoCollection)
-			//{
-			//	var rosterRes = await _nhlService.GetRoster(team);
+			var playersCollection = new List<Player>();
 
-			//	var updateRosterTeamId = rosterRes.Body.Teams[0].RosterInfo.PlayerCollection
-			//		.Select(player =>
-			//		{
-			//			player.TeamId = team.Id;
-			//			return player;
-			//		})
-			//		.ToList();
+			foreach (var team in liveTeamsRes.Body.TeamInfoCollection)
+			{
+				var rosterRes = await _nhlService.GetRoster(team);
 
-			//	playersCollection.AddRange(updateRosterTeamId);
-			//}
+				if (!rosterRes.IsSuccess)
+				{
+					log.LogError($"Could not retrieve roster for team: {team.Name}/{team.Id}. Error: {rosterRes.Message}");
+					continue;
+				}
 
-			//var playerStatCollection = new List<PlayerStat>();
+				var updateRosterTeamId = rosterRes.Body.Teams[0].RosterInfo.PlayerCollection
+					.Select(player =>
+					{
+						player.TeamId = team.Id;
+						return player;
+					})
+					.ToList();
 
-			//foreach (var player in playersCollection)
-			//{
-			//	var playerStatRes = await _nhlService.GetPlayerStat(player);
+				playersCollection.AddRange(updateRosterTeamId);
+			}
 
-			//	if (playerStatRes.IsSuccess)
-			//		playerStatCollection.Add(playerStatRes.Body);
-			//}
+			var playerStatCollection = new List<Stat>();
 
-			//var httpClientGateway = _httpClientFactory.CreateClient("E5-Gateway");
+			foreach (var player in playersCollection)
+			{
+				var playerStatRes = await _nhlService.GetPlayerStat(player);
 
-			//foreach (var playerStat in playerStatCollection)
-			//{
-			//	var content = new StringContent(
-			//		JsonConvert.SerializeObject(playerStat),
-			//		Encoding.UTF8,
-			//		"application/json"
-			//	);
+				if (playerStatRes.IsSuccess)
+					playerStatCollection.Add(playerStatRes.Body);
+			}
 
-			//	var res = await httpClientGateway.PatchAsync("/api/stats/player", content);
+			var httpClient = _httpClientFactory.CreateClient("NhlStatsCrm");
 
-			//	if (!res.IsSuccessStatusCode)
-			//		log.LogError($"Could not patch stats for: {playerStat.PlayerId}. Error: {res.ReasonPhrase}");
-			//}
+			var accessToken = await _authService.GetAccessTokenAsync();
+			httpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", accessToken);
 
-			//return Ok();
+			foreach (var playerStat in playerStatCollection)
+			{
+				var content = new StringContent(
+					JsonConvert.SerializeObject(playerStat),
+					Encoding.UTF8,
+					"application/json"
+				);
+
+				var res = await httpClient.PatchAsync("/api/stats/player", content);
+
+				if (!res.IsSuccessStatusCode)
+					log.LogError($"Could not patch stats for: {playerStat.PlayerId}. Error: {res.ReasonPhrase}");
+			}
+
+			return Ok();
 		}
 	}
 }

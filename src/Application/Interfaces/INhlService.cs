@@ -9,6 +9,6 @@ namespace NhlStatsCrm.Application.Interfaces
 
 		Task<NhlServiceResponse<RosterResponse>> GetRoster (TeamInfo teaminfo);
 
-		Task<NhlServiceResponse<PlayerStat>> GetPlayerStat (Player player);
+		Task<NhlServiceResponse<Stat>> GetPlayerStat (Player player);
 	}
 }
