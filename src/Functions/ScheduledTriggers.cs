@@ -28,15 +28,12 @@ namespace NhlStatsCrm.Functions
 		}
 
 		[FunctionName("PatchPlayersMessage")]
-		public async Task<IActionResult> RunPatchPlayers ([TimerTrigger("0 0 6 * * *")] TimerInfo myTimer, ILogger log)
+		public async Task RunPatchPlayers ([TimerTrigger("0 0 6 * * *")] TimerInfo myTimer, ILogger log)
 		{
 			var liveTeamsRes = await _nhlService.GetLiveTeams();
 
-			if (!liveTeamsRes.IsSuccess)
-				return StatusCode((int)liveTeamsRes.StatusCode);
-
-			if (liveTeamsRes.Body.GameCollection.Count() == 0)
-				return Ok(liveTeamsRes);
+			if (!liveTeamsRes.IsSuccess || liveTeamsRes.Body.GameCollection.Count() == 0)
+				return;
 
 			var playersCollection = new List<Player>();
 
@@ -79,20 +76,15 @@ namespace NhlStatsCrm.Functions
 				if (!res.IsSuccessStatusCode)
 					log.LogError($"Could not patch player: {p.Person.FullName}. Error: {res.ReasonPhrase}");
 			}
-
-			return Ok();
 		}
 
 		[FunctionName("PatchPlayerStatsMessage")]
-		public async Task<IActionResult> RunPatchPlayerStats ([TimerTrigger("0 0 8 * * *")] TimerInfo myTimer, ILogger log)
+		public async Task RunPatchPlayerStats ([TimerTrigger("0 0 8 * * *")] TimerInfo myTimer, ILogger log)
 		{
 			var liveTeamsRes = await _nhlService.GetLiveTeams();
 
-			if (!liveTeamsRes.IsSuccess)
-				return StatusCode((int)liveTeamsRes.StatusCode);
-
-			if (liveTeamsRes.Body.GameCollection.Count() == 0)
-				return Ok(liveTeamsRes);
+			if (!liveTeamsRes.IsSuccess || liveTeamsRes.Body.GameCollection.Count() == 0)
+				return;
 
 			var playersCollection = new List<Player>();
 
@@ -145,8 +137,6 @@ namespace NhlStatsCrm.Functions
 				if (!res.IsSuccessStatusCode)
 					log.LogError($"Could not patch stats for: {playerStat.PlayerId}. Error: {res.ReasonPhrase}");
 			}
-
-			return Ok();
 		}
 	}
 }
