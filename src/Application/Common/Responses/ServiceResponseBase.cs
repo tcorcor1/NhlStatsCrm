@@ -23,12 +23,6 @@ namespace NhlStatsCrm.Application.Common.Responses
 			StatusCode = statusCode;
 			Message = message;
 		}
-
-		public ServiceResponseBase (bool isSuccess, T body)
-		{
-			IsSuccess = isSuccess;
-			Body = body;
-		}
 	}
 
 	public abstract class ServiceResponseBase

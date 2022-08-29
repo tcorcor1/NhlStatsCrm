@@ -24,17 +24,19 @@ namespace NhlStatsCrm.Infrastructure.Services.NhlService
 				: $"/api/v1/schedule?date={date}"; // api/v1/schedule?date=2021-11-24
 
 			var httpClient = _httpClientFactory.CreateClient("NHL-API");
-
 			var response = await httpClient.GetAsync(url);
 
 			if (!response.IsSuccessStatusCode)
-				throw new HttpRequestException($"Could not retrieve schedule response. Message: {response.ReasonPhrase}");
+				throw new HttpRequestException(response.ReasonPhrase);
 
 			var json = await response.Content.ReadAsStringAsync();
 			var scheduleResponse = JsonConvert.DeserializeObject<ScheduleResponse>(json);
 
 			if (scheduleResponse == null)
-				return new NhlServiceResponse<LiveTeamsResponse>(false, response.StatusCode, "No games available");
+				return new NhlServiceResponse<LiveTeamsResponse>(response.IsSuccessStatusCode, response.StatusCode, "Invalid/empty schedule response", new LiveTeamsResponse());
+
+			if (scheduleResponse.TotalGames == 0)
+				return new NhlServiceResponse<LiveTeamsResponse>(response.IsSuccessStatusCode, response.StatusCode, "No games available", new LiveTeamsResponse());
 
 			IEnumerable<TeamInfo> teamInfoCollection = new TeamInfo[] { };
 
@@ -55,10 +57,10 @@ namespace NhlStatsCrm.Infrastructure.Services.NhlService
 				TeamInfoCollection = teamInfoCollection
 			};
 
-			return new NhlServiceResponse<LiveTeamsResponse>(true, liveTeamsResponse);
+			return new NhlServiceResponse<LiveTeamsResponse>(response.IsSuccessStatusCode, response.StatusCode, "Success", liveTeamsResponse);
 		}
 
-		public async Task<NhlServiceResponse<RostersResponse>> GetRoster (TeamInfo teamInfo)
+		public async Task<NhlServiceResponse<RosterResponse>> GetRoster (TeamInfo teamInfo)
 		{
 			ArgumentNullException.ThrowIfNull(teamInfo);
 
@@ -67,13 +69,16 @@ namespace NhlStatsCrm.Infrastructure.Services.NhlService
 			var response = await httpClient.GetAsync($"/api/v1/teams?teamId={teamInfo.Id}&expand=team.roster");
 
 			if (!response.IsSuccessStatusCode)
-				return new NhlServiceResponse<RostersResponse>(response.IsSuccessStatusCode, response.StatusCode, response.ReasonPhrase);
+				throw new HttpRequestException(response.ReasonPhrase);
 
 			var json = await response.Content.ReadAsStringAsync();
 
-			var rosterResponseResults = JsonConvert.DeserializeObject<RostersResponse>(json);
+			var rosterResponse = JsonConvert.DeserializeObject<RosterResponse>(json);
 
-			return new NhlServiceResponse<RostersResponse>(true, rosterResponseResults);
+			if (rosterResponse == null)
+				return new NhlServiceResponse<RosterResponse>(response.IsSuccessStatusCode, response.StatusCode, "Invalid/empty roster response", new RosterResponse());
+
+			return new NhlServiceResponse<RosterResponse>(response.IsSuccessStatusCode, response.StatusCode, "Success", rosterResponse);
 		}
 
 		public async Task<NhlServiceResponse<PlayerStat>> GetPlayerStat (Player player)

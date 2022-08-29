@@ -7,7 +7,7 @@ namespace NhlStatsCrm.Application.Interfaces
 	{
 		Task<NhlServiceResponse<LiveTeamsResponse>> GetLiveTeams (string? date = null);
 
-		Task<NhlServiceResponse<RostersResponse>> GetRoster (TeamInfo teaminfo);
+		Task<NhlServiceResponse<RosterResponse>> GetRoster (TeamInfo teaminfo);
 
 		Task<NhlServiceResponse<PlayerStat>> GetPlayerStat (Player player);
 	}

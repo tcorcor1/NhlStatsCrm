@@ -3,12 +3,12 @@
 namespace NhlStatsCrm.Application.Common.Responses
 {
 	[JsonObject("Rootobject")]
-	public class RostersResponse
+	public class RosterResponse
 	{
 		[JsonProperty("copyright")]
-		public string Copyright { get; set; }
+		public string Copyright { get; set; } = String.Empty;
 
 		[JsonProperty("teams")]
-		public Team[] Teams { get; set; }
+		public Team[] Teams { get; set; } = new Team[] { };
 	}
 }

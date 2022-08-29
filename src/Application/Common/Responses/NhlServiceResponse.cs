@@ -11,9 +11,5 @@ namespace NhlStatsCrm.Application.Common.Responses
 		public NhlServiceResponse (bool isSuccess, HttpStatusCode statusCode, string message) : base(isSuccess, statusCode, message)
 		{
 		}
-
-		public NhlServiceResponse (bool isSuccess, T body) : base(isSuccess, body)
-		{
-		}
 	}
 }
