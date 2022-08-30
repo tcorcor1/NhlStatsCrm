@@ -52,7 +52,7 @@ Initial project setup
 - Replace values in AzureAd prop of appsettings with those from app registration
 - Create your Dataverse connection string replacing default values below
 - Recommend using Azure Key Vault as mechanism for passing secrets to your App Service / Function app
-- Install Dynamics solution [HERE](./docs/img/NhlStatsCrmAzure.png).
+- Install Dynamics solution [HERE](./docs/solutions).
 
 ```javascript
 {
