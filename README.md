@@ -1,6 +1,7 @@
 # NhlStatsCrm
 
 - [Summary](#summary)
+- [Demo](#demo)
 - [Technologies](#technologies)
 - [Network](#network)
 - [Local Development](#local-development)
@@ -14,6 +15,12 @@ The purpose of this project is to take all players and stats from the NHL REST e
 There are scheduled Azure functions that will run overnight and upsert players/stats using the NHL API's id's as an alternate/foreign key.
 
 The API supports some GET requests although this API isn't intended for use by end-users since data should be observed in Dynamics 365.
+
+### Demo
+
+<div>
+  <img align="center" src="./docs/img/NhlStatsCrm_demo.gif" />
+</div>
 
 ### Technologies
 
@@ -45,6 +52,7 @@ Initial project setup
 - Replace values in AzureAd prop of appsettings with those from app registration
 - Create your Dataverse connection string replacing default values below
 - Recommend using Azure Key Vault as mechanism for passing secrets to your App Service / Function app
+- Install Dynamics solution [HERE](./docs/solutions).
 
 ```javascript
 {

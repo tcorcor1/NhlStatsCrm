@@ -104,9 +104,11 @@ namespace NhlStatsCrm.Infrastructure.Persistence.Repositories
 
 		public async Task<Guid?> PatchAsync (Player player)
 		{
+			var playerId = player.Person.Id.ToString();
+
 			var upsertPlayer = new UpsertRequest()
 			{
-				Target = new Entity(Entity, AlternateKey, player.Person.Id.ToString())
+				Target = new Entity(Entity, AlternateKey, playerId)
 				{
 					["yyz_full_name"] = player.Person.FullName,
 					["yyz_team_id"] = new EntityReference("yyz_team", "yyz_legacy_id", player.TeamId),
@@ -116,6 +118,8 @@ namespace NhlStatsCrm.Infrastructure.Persistence.Repositories
 					["yyz_jersey_number"] = Convert.ToInt32(player.JerseyNumber),
 				}
 			};
+
+			_logger.LogInformation("Patching Player: {PlayerId}", playerId);
 
 			var upsertRes = (UpsertResponse)await _service.ExecuteAsync(upsertPlayer);
 
