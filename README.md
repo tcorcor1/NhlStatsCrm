@@ -1,10 +1,12 @@
-# E5NhlCrm
+# NhlStatsCrm
 
 - [Summary](#summary)
+- [Demo](#demo)
 - [Technologies](#technologies)
 - [Network](#network)
 - [Local Development](#local-development)
 - [OpenAPI](./docs/OpenAPI.md)
+- [NHL REST API Docs](#nhl-rest-api-docs)
 
 🚧 🚧 DISCLAIMER 🚧 🚧
 
@@ -12,51 +14,79 @@
 
 ### Summary
 
-The goal of this project is to take all players, player stats and game logs from the NHL REST endpoint on a daily basis and load those into a Dynamics 365 instance. There will be multiple scheduled Azure functions that will run overnight and patch players, player stats and game logs in that order. The API supports a variety of GET requests although this API isn't intended for use by end-users. Automapper is used primarily on those GET requests to simplify the responses to the clients coming from CRM. Organically, the Dynamics REST endpoint will return more information about the entity we want the client to know about and in a less consumable format.
+The purpose of this project is to take all players and stats from the NHL REST endpoint and load into Dynamics 365 on a daily basis.
+
+There are scheduled Azure functions that will run overnight and upsert players/stats using the NHL API's id's as an alternate/foreign key.
+
+The API supports some GET requests although this API isn't intended for use by end-users since data should be observed in Dynamics 365.
+
+### Demo
+
+<div>
+  <img align="center" src="./docs/img/NhlStatsCrm_demo.gif" />
+</div>
 
 ### Technologies
 
 - .NET 6
-- CQRS/Mediatr
+- Mediatr
 - Automapper
-- Node/TypeScript
+- Microsoft Identity Platform
 - CD with Github Actions
 - Power Platform Dataverse Client
 - Azure
-  - App Service (F1 tier)
-  - Functions (consumption)
-  - API Management (consumption)
-  - Key Vault
-  - Application Insights
+  - App Service
+  - Functions
 
 ### Network
 
 <div>
-  <img align="center" src="./docs/img/E5NhlCrmProd.png" />
+  <img align="center" src="./docs/img/NhlStatsCrmAzure.png" />
 </div>
 
 ### Local Development
 
-Project contains a proxy Node/TypeScript project that is serving as a surrogate API management gateway. Although Microsoft offers some local API management solution I prefer this for simple use cases.
+If you haven't already, I highly recommend joining the Microsoft Developer Program. You will receive your own Microsoft 365 tenant which will include a Dynamics instance among many other things. So long as you continue to use this environment for development, your license will be renewed each 90 days. Check out sign-up info [HERE](https://developer.microsoft.com/en-us/microsoft-365/dev-program).
 
-One of the API management gateway's responsibilities will be to add a secret to the request header in order to communicate with the app service environment.
+Initial project setup
 
-Since this is a $0 spent project we are using all free/consumption tiers and do not have static IPs. Validation of the request header will be done by custom middleware in the app service environment. JWT validation will be added in the future to the API management gateway.
-
-The node proxy uses the http-proxy-middleware, dotenv and express in addition to the other dev depenencies (TypeScript, ts-node, nodemon). It simply takes all incoming requests and adds a header from your .env file.
+- Create your appsettings.Production.json and appsettings.Development.json files. There is an example appsettings.json in the project
+- Set up Azure app registration
+- Create app role NhlStatsCrm.Contributor and assign to app user
+- Replace values in AzureAd prop of appsettings with those from app registration
+- Create your Dataverse connection string replacing default values below
+- Recommend using Azure Key Vault as mechanism for passing secrets to your App Service / Function app
+- Install Dynamics solution [HERE](./docs/solutions).
 
 ```javascript
-app.use(
-  "/",
-  createProxyMiddleware({
-    target: process.env.E5_NHL_CRM_ASE as string,
-    changeOrigin: true,
-    onProxyReq: (proxyReq, req, res) => {
-      proxyReq.setHeader(
-        "E5_NHL_CRM_ASE_KEY",
-        process.env.E5_NHL_CRM_ASE_KEY as string
-      );
-    },
-  })
-);
+{
+	"AzureAd": {
+		"Instance": "https://login.microsoftonline.com/",
+		"Domain": "yourdomain.onmicrosoft.com",
+		"TenantId": "00000000-0000-0000-0000-000000000000",
+		"ClientId": "00000000-0000-0000-0000-000000000000",
+		"Audience": "api://00000000-0000-0000-0000-000000000000",
+		"CallbackPath": "/signin-oidc"
+	},
+	"ConnectionStrings": {
+		"DATAVERSE": "AuthType=ClientSecret;ClientId=00000000-0000-0000-0000-000000000000;ClientSecret=gg;URL=https://yourdomain.crm.dynamics.com/;"
+	},
+	"Logging": {
+		"LogLevel": {
+			"Default": "Information",
+			"Microsoft.AspNetCore": "Warning"
+		}
+	},
+	"AllowedHosts": "*"
+}
 ```
+
+### NHL REST API Docs
+
+Big thanks to the legends below. Without you all paving the way, starting projects like this would be much harder. Thank you! 🙏
+
+- [Kevin Sidwar](https://www.kevinsidwar.com/) | Got the ball rolling
+
+- [Jon Ursenbach](https://github.com/erunion) | Built out an [OpenAPI 3 spec](https://github.com/erunion/sport-api-specifications)
+
+- [Drew Hynes](https://github.com/dword4) | Created and maintains the repo used in this project: [NHL REST API Repo](https://gitlab.com/dword4/nhlapi)
